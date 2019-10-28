@@ -56,8 +56,8 @@ import AsyncStorage from '@react-native-community/async-storage';
             console.log('logout',action)
             return Object.assign( {} , state , {
                 isLogged:false,
-                email:'',
-                password:''
+                email:null,
+                password:null
             });
         default:
             return state

@@ -45,9 +45,28 @@ import Login from '../../screens/Login/Login';
         }
     };
 
-    //Set async storage -> If any...
-    setEmailToAsync = (email) => {
-        AsyncStorage.setItem('Async_Email', JSON.stringify(email)); //Set user email to async 
+    //Set the user email to async storage 
+    setValue = async (email) => {
+        try {
+          await AsyncStorage.setItem('Async_Email', JSON.stringify(email))
+        } catch(e) {
+          // save error
+          console.warn('Async Set Error - ',e)
+        }
+      
+        console.log('Email Set Done.')
+    }
+
+    //Remove all the async storage items and keys
+    removeAllAsyncStorage = async () => {
+        try {
+          await AsyncStorage.clear();
+        } catch(e) {
+          // remove error
+          console.warn('Async Clear Error - ',e)
+        }
+      
+        console.log('Async Clear Done.')
     }
 
 
@@ -75,8 +94,7 @@ import Login from '../../screens/Login/Login';
             fetch(URL.USER_LOGIN, {
                 method: 'POST',
                 headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     Email: email,
@@ -99,7 +117,10 @@ import Login from '../../screens/Login/Login';
                         dispatch(loginHasError(false));
                         dispatch(isLogged(true));
 
-                        this.setEmailToAsync(email); // Parse email to save local storafe -> Async
+                        // this.setEmailToAsync(email); // Parse email to save local storafe -> Async
+
+                        this.setValue(email);
+
                         navigation.navigate("Home",{screen:Home}); //Navigate to Home Screen
 
                     }else if(res.status_code == '401'){ //401 -> Invalid credentials
@@ -108,15 +129,18 @@ import Login from '../../screens/Login/Login';
                 })
                 .catch((e) => {
                     console.warn('URL Fetch Error - ',e);
+                    dispatch(loginIsLoading(false))
                     //Dispatch Login Error
                     dispatch(loginHasError(true));
+
                 });
         }
     };
 
     //User log out action
     export const logout = (navigation) => {
-        AsyncStorage.clear();
+
+        this.removeAllAsyncStorage();
         navigation.navigate("Login",{screen:Login});
         return {
             type: ActionType.LOGOUT_USER
