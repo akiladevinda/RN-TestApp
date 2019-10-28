@@ -1,4 +1,4 @@
-/**  
+/**
  * Author : Akila Rathnayaka
  * Description : Import and Export the Assets
  */
@@ -9,17 +9,16 @@ import SplashBackground from '../assets/splash.png';
 import SplashLogo from '../assets/splash_logo.png';
 
 const FormIcons = {
-    IC_Email,
-    IC_Password
-}
+  IC_Email,
+  IC_Password,
+};
 
 const Splash = {
-    SplashBackground,
-    SplashLogo
-}
-
+  SplashBackground,
+  SplashLogo,
+};
 
 export default {
-    FormIcons,
-    Splash
+  FormIcons,
+  Splash,
 };

@@ -1,12 +1,10 @@
 /**
  * Author : Akila Devinda Rathnayaka
  * Copyrights: SAKS Global
- * Version: 
+ * Version:
  * Description: Redux login action types
- * Date: 
+ * Date:
  */
-
-
 
 export const LOGIN_USER = 'LOGIN_USER';
 export const LOGOUT_USER = 'LOGOUT_USER';
