@@ -14,6 +14,7 @@ import {
   ScrollView,
   BackHandler,
   Platform,
+  PermissionsAndroid,
 } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import {Button} from '../../components';
@@ -21,7 +22,7 @@ import {connect} from 'react-redux';
 import {logout} from '../../redux/actions/loginActions';
 import {ScaleUnits, AppStyles} from '../../config';
 import GoogleFit, {Scopes} from 'react-native-google-fit';
-import Fitness from '@ovalmoney/react-native-fitness';
+import AppleHealthKit from 'rn-apple-healthkit';
 
 const options = {
   scopes: [
@@ -30,11 +31,6 @@ const options = {
     Scopes.FITNESS_BODY_READ,
     Scopes.FITNESS_BODY_READ_WRITE,
   ],
-};
-
-const stepsOptions = {
-  startDate: '2019-01-01T00:00:17.971Z', // required ISO8601Timestamp
-  endDate: new Date().toISOString(), // required ISO8601Timestamp
 };
 
 class Home extends Component {
@@ -59,6 +55,25 @@ class Home extends Component {
       this.setState({email: user_email});
     });
 
+    //Check platform
+    if (Platform.OS === 'ios') {
+      //Check Apple Health is Available
+      AppleHealthKit.isAvailable((err, available) => {
+        if (err) {
+          console.log('error initializing Healthkit: ', err);
+          return;
+        }
+        if (available == true) {
+          this.connectToAppleHealKit(); //Connect Apple HealthKit Init
+        } else {
+          alert('Apple HealtKit Not Available');
+        }
+      });
+    } else {
+      this.requestLocationPermission(); //Connect Android Google Fit Init
+    }
+
+    //Android Hardware Back Press
     BackHandler.addEventListener(
       'hardwareBackPress',
       this.handleBackButtonPress,
@@ -84,6 +99,35 @@ class Home extends Component {
     return true;
   };
 
+  //Requesting Location Permissions For Android
+  async requestLocationPermission() {
+    const chckLocationPermission = PermissionsAndroid.check(
+      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+    );
+    if (chckLocationPermission === PermissionsAndroid.RESULTS.GRANTED) {
+      console.log("You've access for the location");
+    } else {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          {
+            title: 'Test App Needs Your Location',
+            buttonNeutral: 'Ask Me Later',
+            buttonNegative: 'Cancel',
+            buttonPositive: 'OK',
+          },
+        );
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          this.connectToGoogleFit(); //If location permissions granted start using google fit
+        } else {
+          console.log("You don't have access for the location");
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  }
+
   //Connection to Google Fit
   connectToGoogleFit = () => {
     GoogleFit.authorize(options)
@@ -91,6 +135,7 @@ class Home extends Component {
         console.warn('Google Fit Auth Result : ', authResult);
         if (authResult.success) {
           console.log('Google Fit Authentication Success ', authResult);
+          var googleFitConnectedDate = new Date().toISOString(); //Save the date of authorization
           this.startUsingGoogleFit(); //If user conencts google fit -> start using services
         } else {
           console.warn('Google Fit Authentication Error ', authResult.message);
@@ -101,18 +146,49 @@ class Home extends Component {
       });
   };
 
-  //Check Google Fit Available or not
+  //Start using Google Fit Services -> Android
   startUsingGoogleFit = () => {
-    // GoogleFit.startRecording(callback => {
-    //   console.log(callback);
-    // });
+    const stepsOptions = {
+      startDate: '2019-10-28T00:00:17.971Z', // required ISO8601Timestamp
+      endDate: new Date().toISOString(), // required ISO8601Timestamp
+    };
     GoogleFit.getDailyStepCountSamples(stepsOptions)
       .then(res => {
-        console.log('Daily steps >>> ', res);
+        console.log('Daily steps Count >>> ', res);
       })
       .catch(err => {
         console.warn(err);
       });
+  };
+
+  //Connect to Apple HealthKit -> iOS
+  connectToAppleHealKit = () => {
+    let options = {
+      permissions: {
+        read: ['Height', 'Weight', 'StepCount', 'DateOfBirth', 'BiologicalSex'],
+        write: ['Height', 'Weight', 'StepCount'],
+      },
+    };
+
+    AppleHealthKit.initHealthKit(options, (err, results) => {
+      if (err) {
+        console.log('error initializing Healthkit: ', err);
+        return;
+      }
+      this.appleHealthKitActions(); //Do Apple Health Actions
+    });
+  };
+
+  //All Appkle HealthKit Actions -> ios
+  appleHealthKitActions = () => {
+    //Get user date of birth
+    AppleHealthKit.getDateOfBirth(null, (err, results) => {
+      console.log('Date of Birth - ', results);
+    });
+    //Get user gender
+    AppleHealthKit.getBiologicalSex(null, (err, results) => {
+      console.log('Gender  - ', results);
+    });
   };
 
   //render plaform specific button for accessing health
@@ -122,7 +198,7 @@ class Home extends Component {
         <View style={styles.buttonContainer}>
           <Button
             title="Connect to Apple HealthKit"
-            onPress={() => alert('Apple HealthKit')}
+            onPress={() => this.connectToAppleHealKit()}
           />
         </View>
       );

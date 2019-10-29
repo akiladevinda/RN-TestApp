@@ -4,7 +4,7 @@
 */
 
 const AppStyles = {
-  primaryFont: 'HKNova-Medium',
+  primaryFont: 'Arial',
   primaryColor: '#7C1027',
   primaryColorDark: '#7C1027',
   primaryColorLight: '#C9082A',

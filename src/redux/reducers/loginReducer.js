@@ -7,7 +7,6 @@
  */
 
 import * as ActionTypes from '../actions/loginActionTypes';
-import AsyncStorage from '@react-native-community/async-storage';
 
 //Set Initial state for the login component
 const initialState = {

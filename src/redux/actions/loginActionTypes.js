@@ -6,6 +6,7 @@
  * Date:
  */
 
+//Login Action Types
 export const LOGIN_USER = 'LOGIN_USER';
 export const LOGOUT_USER = 'LOGOUT_USER';
 export const USER_IS_LOGGED = 'USER_IS_LOGGED';
