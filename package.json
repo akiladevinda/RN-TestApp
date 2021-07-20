@@ -13,7 +13,7 @@
     "@ovalmoney/react-native-fitness": "^0.2.4",
     "@react-native-community/async-storage": "^1.6.2",
     "react": "16.9.0",
-    "react-native": "0.61.2",
+    "react-native": "0.62.3",
     "react-native-dialog": "^5.6.0",
     "react-native-gesture-handler": "^1.4.1",
     "react-native-google-fit": "^0.9.15",
